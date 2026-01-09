@@ -6,12 +6,10 @@ import './ProjectForm.css';
 interface ProjectFormProps {
   onSubmit: (project: Project) => void;
   onCancel: () => void;
-  // ДОДАЄМО ЦЕЙ РЯДОК: він каже, що форма може приймати дані проекту або нічого
   initialData?: Project | null; 
 }
 
 const ProjectForm = ({ onSubmit, onCancel, initialData }: ProjectFormProps) => {
-  // Ініціалізуємо стан: якщо initialData є — підставляємо його значення, якщо ні — пусті поля
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     client: initialData?.client || '',
@@ -23,9 +21,7 @@ const ProjectForm = ({ onSubmit, onCancel, initialData }: ProjectFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Формуємо об'єкт проекту
     onSubmit({
-      // Якщо ми редагуємо, залишаємо старий ID, якщо створюємо новий — генеруємо через Date.now()
       id: initialData?.id || Date.now().toString(),
       name: formData.name,
       client: formData.client,

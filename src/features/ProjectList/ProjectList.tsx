@@ -91,7 +91,6 @@ const ProjectList = ({ projects, searchQuery, onAddProject, onUpdateProject, onD
                 </td>
                 <td style={{ textAlign: 'right' }}>
                   <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                    {/* Кнопка редагування */}
                     <button 
                       className="action-btn edit"
                       onClick={() => handleOpenEdit(project)}
@@ -101,7 +100,6 @@ const ProjectList = ({ projects, searchQuery, onAddProject, onUpdateProject, onD
                       <Edit2 size={18} />
                     </button>
                     
-                    {/* Кнопка видалення */}
                     <button 
                       className="action-btn delete"
                       onClick={() => onDeleteProject(project.id)}

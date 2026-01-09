@@ -15,7 +15,6 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // --- ЛОГІКА ТЕМИ ---
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('nexus_theme') || 'dark';
   });
@@ -29,7 +28,6 @@ function App() {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
 
-  // --- ЛОГІКА ПРОЄКТІВ ТА КОРИСТУВАЧА ---
   const [projects, setProjects] = useState<Project[]>(() => {
     const saved = localStorage.getItem('nexus_projects');
     return saved ? JSON.parse(saved) : initialProjects;
