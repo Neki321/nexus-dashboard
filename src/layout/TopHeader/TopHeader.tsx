@@ -2,13 +2,14 @@ import ThemeToggle from '../../components/ThemeToggle/ThemeToggle';
 import { Search } from 'lucide-react';
 import './TopHeader.css';
 
-const currentUser = { name: "Гість", role: "Адміністратор" }; // Поки немає логіну
-
 interface TopHeaderProps {
   onSearch: (query: string) => void;
+  user: { name: string; role: string; email: string };
+  theme: string;
+  toggleTheme: () => void;
 }
 
-const TopHeader = ({ onSearch }: TopHeaderProps) => {
+const TopHeader = ({ onSearch, user, theme, toggleTheme }: TopHeaderProps) => {
   return (
     <header className="top-header">
       <div className="search-box">
@@ -21,12 +22,12 @@ const TopHeader = ({ onSearch }: TopHeaderProps) => {
       </div>
       
       <div className="header-actions">
-        <ThemeToggle />
+        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
         <div className="user-profile">
-          <div className="avatar">{currentUser.name.charAt(0)}</div>
+          <div className="avatar">{user.name.charAt(0)}</div>
           <div className="user-info">
-             <span className="user-name">{currentUser.name}</span>
-             <span className="user-role">{currentUser.role}</span>
+             <span className="user-name">{user.name}</span>
+             <span className="user-role">{user.role}</span>
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import Modal from '../../components/Modal/Modal';
 import Button from '../../components/Button/Button';
 import StatusBadge from '../../components/StatusBadge/StatusBadge';
 import ProjectForm from './ProjectForm';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Edit2 } from 'lucide-react';
 import { type Project, type ProjectStatus } from '../../types/project';
 import './ProjectList.css';
 
@@ -11,12 +11,14 @@ interface ProjectListProps {
   projects: Project[];
   searchQuery: string;
   onAddProject: (project: Project) => void;
+  onUpdateProject: (project: Project) => void;
   onDeleteProject: (id: string) => void;
 }
 
-const ProjectList = ({ projects, searchQuery, onAddProject, onDeleteProject }: ProjectListProps) => {
+const ProjectList = ({ projects, searchQuery, onAddProject, onUpdateProject, onDeleteProject }: ProjectListProps) => {
   const [filter, setFilter] = useState<ProjectStatus | 'Всі'>('Всі');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   const filteredProjects = projects.filter(project => {
     const matchesStatus = filter === 'Всі' || project.status === filter;
@@ -24,6 +26,21 @@ const ProjectList = ({ projects, searchQuery, onAddProject, onDeleteProject }: P
                           project.client.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStatus && matchesSearch;
   });
+
+  const handleOpenCreate = () => {
+    setEditingProject(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (project: Project) => {
+    setEditingProject(project);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingProject(null);
+  };
 
   const filterOptions: (ProjectStatus | 'Всі')[] = ['Всі', 'Активний', 'Завершений', 'Очікує'];
 
@@ -43,7 +60,7 @@ const ProjectList = ({ projects, searchQuery, onAddProject, onDeleteProject }: P
               </button>
             ))}
           </div>
-          <Button onClick={() => setIsModalOpen(true)}>+ Новий проєкт</Button>
+          <Button onClick={handleOpenCreate}>+ Новий проєкт</Button>
         </div>
       </div>
 
@@ -73,30 +90,27 @@ const ProjectList = ({ projects, searchQuery, onAddProject, onDeleteProject }: P
                   </div>
                 </td>
                 <td style={{ textAlign: 'right' }}>
-                  <button 
-                    className="delete-btn"
-                    onClick={() => onDeleteProject(project.id)}
-                    title="Видалити проєкт"
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--text-muted)',
-                      cursor: 'pointer',
-                      padding: '8px',
-                      borderRadius: '6px',
-                      transition: 'all 0.2s',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = '#ef4444';
-                      e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = 'var(--text-muted)';
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                    {/* Кнопка редагування */}
+                    <button 
+                      className="action-btn edit"
+                      onClick={() => handleOpenEdit(project)}
+                      title="Редагувати"
+                      style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px', borderRadius: '6px' }}
+                    >
+                      <Edit2 size={18} />
+                    </button>
+                    
+                    {/* Кнопка видалення */}
+                    <button 
+                      className="action-btn delete"
+                      onClick={() => onDeleteProject(project.id)}
+                      title="Видалити"
+                      style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px', borderRadius: '6px' }}
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -104,13 +118,19 @@ const ProjectList = ({ projects, searchQuery, onAddProject, onDeleteProject }: P
         </table>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Створити новий проєкт">
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={handleCloseModal} 
+        title={editingProject ? "Редагувати проєкт" : "Створити новий проєкт"}
+      >
         <ProjectForm 
           onSubmit={(data) => {
-            onAddProject(data);
-            setIsModalOpen(false);
+            if (editingProject) onUpdateProject(data);
+            else onAddProject(data);
+            handleCloseModal();
           }} 
-          onCancel={() => setIsModalOpen(false)} 
+          onCancel={handleCloseModal}
+          initialData={editingProject} 
         />
       </Modal>
     </div>

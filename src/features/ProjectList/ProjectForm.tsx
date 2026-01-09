@@ -6,30 +6,34 @@ import './ProjectForm.css';
 interface ProjectFormProps {
   onSubmit: (project: Project) => void;
   onCancel: () => void;
+  // ДОДАЄМО ЦЕЙ РЯДОК: він каже, що форма може приймати дані проекту або нічого
+  initialData?: Project | null; 
 }
 
-const ProjectForm = ({ onSubmit, onCancel }: ProjectFormProps) => {
+const ProjectForm = ({ onSubmit, onCancel, initialData }: ProjectFormProps) => {
+  // Ініціалізуємо стан: якщо initialData є — підставляємо його значення, якщо ні — пусті поля
   const [formData, setFormData] = useState({
-    name: '',
-    client: '',
-    budget: '',
-    status: 'Активний' as ProjectStatus,
-    deadline: '',
-    progress: '0'
+    name: initialData?.name || '',
+    client: initialData?.client || '',
+    budget: initialData?.budget?.toString() || '',
+    status: initialData?.status || 'Активний' as ProjectStatus,
+    progress: initialData?.progress?.toString() || '0'
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newProject: Project = {
-      id: Date.now().toString(),
+    
+    // Формуємо об'єкт проекту
+    onSubmit({
+      // Якщо ми редагуємо, залишаємо старий ID, якщо створюємо новий — генеруємо через Date.now()
+      id: initialData?.id || Date.now().toString(),
       name: formData.name,
       client: formData.client,
       budget: Number(formData.budget),
-      status: formData.status,
-      deadline: formData.deadline,
-      progress: Number(formData.progress)
-    };
-    onSubmit(newProject);
+      status: formData.status as ProjectStatus,
+      progress: Number(formData.progress),
+      deadline: initialData?.deadline || new Date().toISOString()
+    });
   };
 
   return (
@@ -92,7 +96,9 @@ const ProjectForm = ({ onSubmit, onCancel }: ProjectFormProps) => {
 
       <div className="form-actions">
         <Button variant="outline" type="button" onClick={onCancel}>Скасувати</Button>
-        <Button type="submit">Створити проєкт</Button>
+        <Button type="submit">
+          {initialData ? 'Зберегти зміни' : 'Створити проєкт'}
+        </Button>
       </div>
     </form>
   );

@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import MainLayout from './layout/MainLayout/MainLayout';
 import ProjectList from './features/ProjectList/ProjectList';
 import ClientGrid from './features/ClientGrid/ClientGrid';
 import StatCard from './components/StatCard/StatCard';
+import Settings from './features/Settings/Settings';
 import { projectsData as initialProjects } from './data/mockData';
 import { clientsData } from './data/mockData';
 import { Briefcase, Users, DollarSign, PieChart } from 'lucide-react';
@@ -13,10 +14,50 @@ import './App.css';
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
+
+  // --- ЛОГІКА ТЕМИ ---
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('nexus_theme') || 'dark';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('nexus_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
+  // --- ЛОГІКА ПРОЄКТІВ ТА КОРИСТУВАЧА ---
+  const [projects, setProjects] = useState<Project[]>(() => {
+    const saved = localStorage.getItem('nexus_projects');
+    return saved ? JSON.parse(saved) : initialProjects;
+  });
+  
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('nexus_user');
+    return saved ? JSON.parse(saved) : {
+      name: 'Neki',
+      role: 'Admin',
+      email: 'neki@nexus.db'
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('nexus_projects', JSON.stringify(projects));
+  }, [projects]);
+
+  useEffect(() => {
+    localStorage.setItem('nexus_user', JSON.stringify(user));
+  }, [user]);
 
   const handleAddProject = (newProject: Project) => {
     setProjects(prev => [newProject, ...prev]);
+  };
+
+  const handleUpdateProject = (updatedProject: Project) => {
+    setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
   };
 
   const handleDeleteProject = (id: string) => {
@@ -45,37 +86,34 @@ function App() {
       activeTab={activeTab} 
       setActiveTab={setActiveTab} 
       onSearch={setSearchQuery}
+      user={user}
+      theme={theme}
+      toggleTheme={toggleTheme}
     >
-      {activeTab === 'dashboard' && (
+      {(activeTab === 'dashboard' || activeTab === 'projects') && (
         <>
-          <div className="stats-grid">
-            <StatCard title="Активні проєкти" value={stats.activeProjects} icon={Briefcase} />
-            <StatCard title="Загальний бюджет" value={`$${stats.totalBudget}`} icon={DollarSign} />
-            <StatCard title="Клієнти" value={stats.totalClients} icon={Users} />
-            <StatCard title="Сер. прогрес" value={stats.avgProgress} icon={PieChart} />
-          </div>
+          {activeTab === 'dashboard' && (
+            <div className="stats-grid">
+              <StatCard title="Активні проєкти" value={stats.activeProjects} icon={Briefcase} />
+              <StatCard title="Загальний бюджет" value={`$${stats.totalBudget}`} icon={DollarSign} />
+              <StatCard title="Клієнти" value={stats.totalClients} icon={Users} />
+              <StatCard title="Сер. прогрес" value={stats.avgProgress} icon={PieChart} />
+            </div>
+          )}
           <ProjectList 
             projects={projects} 
             searchQuery={searchQuery} 
             onAddProject={handleAddProject} 
-            onDeleteProject={handleDeleteProject} 
+            onUpdateProject={handleUpdateProject}
+            onDeleteProject={handleDeleteProject}
           />
         </>
-      )}
-
-      {activeTab === 'projects' && (
-        <ProjectList 
-          projects={projects} 
-          searchQuery={searchQuery} 
-          onAddProject={handleAddProject} 
-          onDeleteProject={handleDeleteProject}
-        />
       )}
 
       {activeTab === 'clients' && <ClientGrid searchQuery={searchQuery} />}
       
       {activeTab === 'settings' && (
-        <div className="placeholder-card">Налаштування профілю (В розробці)</div>
+        <Settings user={user} setUser={setUser} />
       )}
     </MainLayout>
   );

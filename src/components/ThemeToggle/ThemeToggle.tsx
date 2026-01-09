@@ -1,21 +1,19 @@
 import { Sun, Moon } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import './ThemeToggle.css';
 
-const ThemeToggle = () => {
-  const [isDark, setIsDark] = useState(false);
+interface ThemeToggleProps {
+  theme: string;
+  toggleTheme: () => void;
+}
 
-  useEffect(() => {
-    if (isDark) {
-      document.body.classList.add('dark');
-    } else {
-      document.body.classList.remove('dark');
-    }
-  }, [isDark]);
-
+const ThemeToggle = ({ theme, toggleTheme }: ThemeToggleProps) => {
   return (
-    <button className="theme-toggle" onClick={() => setIsDark(!isDark)}>
-      {isDark ? <Sun size={20} /> : <Moon size={20} />}
+    <button 
+      className="theme-toggle" 
+      onClick={toggleTheme} 
+      title={theme === 'light' ? 'Увімкнути темну тему' : 'Увімкнути світлу тему'}
+    >
+      {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
     </button>
   );
 };
